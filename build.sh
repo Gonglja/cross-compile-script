@@ -104,39 +104,33 @@ cd $WORK_DIR/lcm-1.3.0-saic && make clean
             &&make -j$MAKE_JOBS \
             &&make install
 
-
-rm -rf $RESULT_DIR/protobuf-2.6.1/*
-cd $WORK_DIR/protobuf-2.6.1/ && make distclean && make clean
+##########################################################################################################
+LIBRARY_VERSION=protobuf-3.3.0
+rm -rf $RESULT_DIR/$LIBRARY_VERSION/*
+cd $WORK_DIR/$LIBRARY_VERSION/ && make distclean && make clean
 # 应用本机（x86）编译生成protoc等执行文件：
-./configure --prefix=$RESULT_DIR/protobuf-2.6.1/x86 CC=$LOCAL_CC && \
+./configure --prefix=$RESULT_DIR/$LIBRARY_VERSION/x86 CC=$LOCAL_CC && \
             make -j$MAKE_JOBS && \
             make install      && \
             make distclean    && \
             make clean
 # 应用交叉编译链进行交叉编译，替换protoc执行文件：
-./configure --prefix=$RESULT_DIR/protobuf-2.6.1/arm --host=$HOST \
+./configure --prefix=$RESULT_DIR/$LIBRARY_VERSION/arm --host=$HOST \
             CC=$CROSS_CC CXX=$CROSS_CXX  \
-            --enable-shared  --with-protoc=$RESULT_DIR/protobuf-2.6.1/x86/bin/protoc &&\
+            --enable-shared  --with-protoc=$RESULT_DIR/$LIBRARY_VERSION/x86/bin/protoc &&\
             make -j$MAKE_JOBS && \
             make install
 
+############################################################################################################
+LIBRARY_VERSION=cryptopp-CRYPTOPP_8_1_0
+rm -rf $RESULT_DIR/$LIBRARY_VERSION/
+cd $WORK_DIR/$LIBRARY_VERSION/ && make distclean && make clean
+rm -rf GNUmakefile-cross
+make CC=$CROSS_CC CXX=$CROSS_CXX  \
+     CXXFLAGS="-DNDEBUG -mfloat-abi=softfp -mfpu=neon" -j4 static dynamic 
+mkdir -p $RESULT_DIR/$LIBRARY_VERSION/lib  &&  mv libcryptopp.* $RESULT_DIR/$LIBRARY_VERSION/lib
 
-rm -rf $RESULT_DIR/protobuf-3.5.1/*
-cd $WORK_DIR/protobuf-3.5.1/ && make distclean && make clean
-# 应用本机（x86）编译生成protoc等执行文件：
-./configure --prefix=$RESULT_DIR/protobuf-3.5.1/x86 CC=$LOCAL_CC &&\
-            make -j$MAKE_JOBS && \
-            make install      && \
-            make distclean    && \
-            make clean
-# 应用交叉编译链进行交叉编译，替换protoc执行文件：
-./configure --prefix=$RESULT_DIR/protobuf-3.5.1/arm --host=$HOST \
-            CC=$CROSS_CC CXX=$CROSS_CXX  \
-            --enable-shared  --with-protoc=$RESULT_DIR/protobuf-3.5.1/x86/bin/protoc && \
-            make -j$MAKE_JOBS && \
-            make install
-
-
+############################################################################################################
 rm -rf $RESULT_DIR/zeromq-4.3.1/*
 cd $WORK_DIR/zeromq-4.3.1 && make clean
 ./configure --prefix=$RESULT_DIR/zeromq-4.3.1/  \
